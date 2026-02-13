@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単語帳メーカー</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+}
+input, button {
+    margin: 5px 0;
+    padding: 8px;
+    width: 100%;
+}
+.card {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-size: 20px;
+}
+.stats {
+    margin-top: 10px;
+}
+button.small {
+    width: 48%;
+}
+.flex {
+    display: flex;
+    justify-content: space-between;
+}
+</style>
+</head>
+<body>
+
+<h2>単語帳メーカー</h2>
+
+<h3>単語を追加</h3>
+<input type="text" id="wordInput" placeholder="単語">
+<input type="text" id="meaningInput" placeholder="意味">
+<button onclick="addWord()">追加</button>
+
+<hr>
+
+<h3>出題</h3>
+<div class="card" id="card">単語がありません</div>
+<button onclick="showMeaning()">意味を見る</button>
+
+<div class="flex">
+    <button class="small" onclick="markCorrect()">正解</button>
+    <button class="small" onclick="markWrong()">不正解</button>
+</div>
+
+<div class="stats">
+    出題数: <span id="total">0</span><br>
+    正解数: <span id="correct">0</span><br>
+    正解率: <span id="accuracy">0</span>%
+</div>
+
+<button onclick="resetStats()">統計リセット</button>
+
+<script>
+let words = JSON.parse(localStorage.getItem("words")) || [];
+let current = null;
+let total = 0;
+let correct = 0;
+
+function saveWords() {
+    localStorage.setItem("words", JSON.stringify(words));
+}
+
+function addWord() {
+    const word = document.getElementById("wordInput").value.trim();
+    const meaning = document.getElementById("meaningInput").value.trim();
+    if (!word || !meaning) return alert("両方入力してください");
+
+    words.push({ word, meaning });
+    saveWords();
+    document.getElementById("wordInput").value = "";
+    document.getElementById("meaningInput").value = "";
+    alert("追加しました");
+}
+
+function shuffle() {
+    return words[Math.floor(Math.random() * words.length)];
+}
+
+function nextQuestion() {
+    if (words.length === 0) {
+        document.getElementById("card").innerText = "単語がありません";
+        return;
+    }
+    current = shuffle();
+    document.getElementById("card").innerText = current.word;
+}
+
+function showMeaning() {
+    if (current) {
+        document.getElementById("card").innerText = current.meaning;
+    }
+}
+
+function markCorrect() {
+    if (!current) return;
+    total++;
+    correct++;
+    updateStats();
+    nextQuestion();
+}
+
+function markWrong() {
+    if (!current) return;
+    total++;
+    updateStats();
+    nextQuestion();
+}
+
+function updateStats() {
+    document.getElementById("total").innerText = total;
+    document.getElementById("correct").innerText = correct;
+    let acc = total === 0 ? 0 : ((correct / total) * 100).toFixed(1);
+    document.getElementById("accuracy").innerText = acc;
+}
+
+function resetStats() {
+    total = 0;
+    correct = 0;
+    updateStats();
+}
+
+nextQuestion();
+</script>
+
+</body>
+</html># tango-apuri
